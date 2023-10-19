@@ -1,0 +1,24 @@
+{
+	"name": "Source_DS_Copy_only_csv_v1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Avinash_Source_Linked_Service",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "Source",
+				"fileSystem": "avinash-source-container"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

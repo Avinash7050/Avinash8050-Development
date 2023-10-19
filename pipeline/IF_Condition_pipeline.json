@@ -1,0 +1,61 @@
+{
+	"name": "IF_Condition_pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "If_Condition_Activity",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@contains(pipeline().parameters.Operation, 'Extraction')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Execute_Ingestion_Pipeline_If_False",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Copy_Text_Files_Only",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Execute_Extraction_Pipeline_If_True",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Copy_SQL_ADLS_Extraction_purpose",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Operation": {
+				"type": "array",
+				"defaultValue": [
+					"Extraction",
+					"Ingestion"
+				]
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-09T13:26:54Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
