@@ -13,6 +13,167 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/Copy_Text_Files_Only')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get_Meta_Copy_txt_Files_Only",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "Get_Meta_For_Filter_Activity_Source",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems",
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Filter_for_txt_files",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Get_Meta_Copy_txt_Files_Only",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get_Meta_Copy_txt_Files_Only').output.childItems",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@contains(item().name,'.docx')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "For_each_txt_loop",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter_for_txt_files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter_for_txt_files').output.Value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy_Only_txt_files",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "Source_copy_only_txt_files",
+											"type": "DatasetReference",
+											"parameters": {
+												"Source_txt_file_only": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Target_copy_only_txt_files",
+											"type": "DatasetReference",
+											"parameters": {
+												"Target_txt_files_only": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-08T12:34:58Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Custom_Full_Load_Pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -2054,7 +2215,9 @@
 				"annotations": [],
 				"lastPublishTime": "2023-10-09T13:26:54Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Copy_Text_Files_Only')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Until_Activity_Pipeline')]",
@@ -2256,98 +2419,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2023-10-09T13:42:23Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Set_Variable_Pipeline')]",
-				"[concat(variables('factoryId'), '/pipelines/IF_Condition_pipeline')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Validation_Pipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Execute_set_variable_pipeline",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Validation_Activity",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "Set_Variable_Pipeline",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Execute_if_condition_pipeline",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Wait_for_10_seconds",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "IF_Condition_pipeline",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Wait_for_10_seconds",
-						"type": "Wait",
-						"dependsOn": [
-							{
-								"activity": "Execute_set_variable_pipeline",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 10
-						}
-					},
-					{
-						"name": "Validation_Activity",
-						"type": "Validation",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "Source_DS_Set_Variable_Activity",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"timeout": "0.00:00:20",
-							"sleep": 10,
-							"childItems": true
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-10-09T20:37:53Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/Set_Variable_Pipeline')]",
