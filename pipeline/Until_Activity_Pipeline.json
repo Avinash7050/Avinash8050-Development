@@ -1,0 +1,128 @@
+{
+	"name": "Until_Activity_Pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Until_Activity",
+				"type": "Until",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@bool(variables('Status'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Lookup_for_Until_Status",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Pause_For_10_Seconds",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "Select Refreshed as Status\nfrom Mastertable\nwhere Table_Name = 'Sales';\n",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "Source_SQL_lookup",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "If_Condition_for_look_up",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Lookup_for_Until_Status",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(activity('Lookup_for_Until_Status').output.firstRow.status, 'Y')",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Set_Variable_for_If_Condition",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "Status",
+											"value": "True"
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "Pause_For_10_Seconds",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 10
+							}
+						}
+					],
+					"timeout": "0.00:02:00"
+				}
+			},
+			{
+				"name": "Executer_Pipeline_for_Until",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Until_Activity",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Simple_Copy_Activity_for_Until_Activity",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"variables": {
+			"Status": {
+				"type": "String",
+				"defaultValue": "False"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-13T07:47:19Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

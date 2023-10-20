@@ -1,0 +1,109 @@
+{
+	"name": "Set_Variable_for_Info_purpose",
+	"properties": {
+		"activities": [
+			{
+				"name": "Adf_Name",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Adf_Name",
+					"value": {
+						"value": "@pipeline().DataFactory",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Pipeline_Name",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Adf_Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Pipeline_Name",
+					"value": {
+						"value": "@pipeline().Pipeline",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Store_Procedure_for_Set_Variable",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Pipeline_Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[Avinash]",
+					"storedProcedureParameters": {
+						"exist": {
+							"value": null,
+							"type": "String"
+						},
+						"name": {
+							"value": {
+								"value": "@variables('Adf_Name')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"type": {
+							"value": {
+								"value": "@variables('Pipeline_Name')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "Avinash_AZ_SQL_Linked_Service",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"variables": {
+			"Adf_Name": {
+				"type": "String"
+			},
+			"Pipeline_Name": {
+				"type": "String"
+			},
+			"Dummy_Variable_Name": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-09T04:18:45Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

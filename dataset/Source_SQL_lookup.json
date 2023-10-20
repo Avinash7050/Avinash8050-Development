@@ -1,0 +1,17 @@
+{
+	"name": "Source_SQL_lookup",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Avinash_AZ_SQL_Linked_Service",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "mastertable"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

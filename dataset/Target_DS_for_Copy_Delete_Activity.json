@@ -1,0 +1,33 @@
+{
+	"name": "Target_DS_for_Copy_Delete_Activity",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Avinash_Source_Linked_Service",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Target_File_Name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().Target_File_Name",
+					"type": "Expression"
+				},
+				"folderPath": "Target_for_Delete_Activity",
+				"fileSystem": "avinash-source-container"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
