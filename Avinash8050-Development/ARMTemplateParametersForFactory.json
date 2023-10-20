@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "Avinash8050-Development"
+		},
+		"Avinash_AZ_SQL_Linked_Service_connectionString": {
+			"value": ""
+		},
+		"Avinash_Source_Linked_Service_accountKey": {
+			"value": ""
+		},
+		"Incremental_Target_Linked_Service_connectionString": {
+			"value": ""
+		},
+		"Script_Activity_Linked_Service_connectionString": {
+			"value": ""
+		},
+		"Avinash_Source_Linked_Service_properties_typeProperties_url": {
+			"value": "https://avinashdevadls.dfs.core.windows.net/"
+		}
+	}
+}
