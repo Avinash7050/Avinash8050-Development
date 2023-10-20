@@ -1,0 +1,33 @@
+{
+	"name": "Source_copy_only_txt_files",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Avinash_Source_Linked_Service",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Source_txt_file_only": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().Source_txt_file_only",
+					"type": "Expression"
+				},
+				"folderPath": "Source",
+				"fileSystem": "avinash-source-container"
+			},
+			"columnDelimiter": "\t",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
